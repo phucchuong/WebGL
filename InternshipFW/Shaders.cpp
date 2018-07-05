@@ -18,6 +18,7 @@ int Shaders::Init(char * fileVertexShader, char * fileFragmentShader)
 
 	//finding location of uniforms / attributes
 	a_position = glGetAttribLocation(program, "a_position");
+	a_color = glGetAttribLocation(program, "color");
 
 	return 0;
 }
