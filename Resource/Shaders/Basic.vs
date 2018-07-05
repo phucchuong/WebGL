@@ -1,14 +1,12 @@
-
 attribute vec3 a_position;
-uniform mat4 vMatrix;
-uniform mat4 pMatrix;
-uniform mat4 mMatrix;
+attribute vec2 texcoord;
 
-attribute vec3 color;
-varying vec3 vcolor;
+varying vec2 vtexcoord;
 
-void main(){
-	gl_Position = vec4(a_position,1.0);
-	gl_Position = pMatrix * vMatrix * mMatrix * gl_Position;
-	vcolor = color;
+void main()
+{
+	vec4 positionL = vec4(a_position, 1.0);
+	gl_Position = positionL;
+	vtexcoord = texcoord;
 }
+   
