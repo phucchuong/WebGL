@@ -73,10 +73,12 @@ void Application::Render()
 		glEnableVertexAttribArray(myShaders.a_color);
 		glVertexAttribPointer(myShaders.a_color, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (char*)vertexData+12);
 	}
-	if (myShaders.translate != -1)
+	if (myShaders.scale != -1)
 	{
-		GLfloat tx = 0.1, ty = 0.5, tz = 0;
-		glUniform4f(myShaders.translate,tx, ty, tz, 0.0);
+		Matrix scale;
+		GLfloat sx = 1.0, sy = 1.5, sz = 1.0;
+		scale.SetScale(sx, sy, sz);
+		glUniformMatrix4fv(myShaders.scale, 1, GL_FALSE, (float*)&scale);
 	}
 
 	glDrawArrays(GL_TRIANGLES, 0, 3);
