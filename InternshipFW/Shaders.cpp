@@ -20,6 +20,10 @@ int Shaders::Init(char * fileVertexShader, char * fileFragmentShader)
 	a_position = glGetAttribLocation(program, "a_position");
 	a_texcoord = glGetAttribLocation(program, "texcoord");
 	a_texture = glGetUniformLocation(program, "texture");
+	pMatrix = glGetUniformLocation(program, "pMatrix");
+	vMatrix = glGetUniformLocation(program, "vMatrix");
+	mMatrix = glGetUniformLocation(program, "mMatrix");
+
 	return 0;
 }
 /// \brief Load a shader, check for compile errors, print error messages to output log
@@ -38,10 +42,7 @@ GLuint Shaders::LoadShader(GLenum type, const char * filename)
 	if (shader == 0)
 		return 0;
 
-
-
 	char * Shaderrc = FileSystem::GetInstance()->GetContent(filename);
-
 
 	glShaderSource(shader, 1, (const char **)&Shaderrc, NULL);
 	delete[] Shaderrc;
