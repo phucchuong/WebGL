@@ -151,33 +151,34 @@ void Application::Update(float deltatime)
 {
 	Input * input = Input::GetInstance();
 
+	static float theta = 0, phi = 0;
+	static int x = 0, y = 0;
+	static float dx = 0, dy = 0;
+	static float AMORTIZATION = 0.995;
+	theta *= AMORTIZATION;
+	phi *= AMORTIZATION;
+
+	if (input->HasPointer(POINTER_DOWN)) {
+		x = input->PointerX, y = input->PointerY;
+	}
 	if (input->HasPointer(POINTER_DRAGGED))
 	{
-		LOGI("\nPOINTER_DRAGGED");
-	}
-	if (input->HasPointer(POINTER_DOWN))
-	{
-		LOGI("\nPOINTER_DOWN");
-	}
-	if (input->HasPointer(POINTER_UP))
-	{
-		LOGI("\nPOINTER_UP");
+		dx = (input->PointerX - x) * 2 * M_PI / 800;
+		dy = (input->PointerY - y) * 2 * M_PI / 640;
+		x = input->PointerX, y = input->PointerY;
+		theta += dx;
+		phi += dy;
 	}
 
-	if (input->KeyPressed())
-	{
-		LOGI("\nKey Pressed");
-	}
-	rotateX(mov_matrix, 0.3*deltatime);
-	rotateY(mov_matrix, 0.6*deltatime);
-	rotateZ(mov_matrix, 0.0 * deltatime);
+	rotateX(mov_matrix, 0.01*phi);
+	rotateY(mov_matrix, 0.01*theta);
 }
 
 // Render application
 
 void Application::Render()
 {
-	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 
@@ -191,7 +192,7 @@ void Application::Render()
 	if (myShaders.a_color != -1)
 	{
 		glEnableVertexAttribArray(myShaders.a_color);
-		glVertexAttribPointer(myShaders.a_color, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (char*)vertexData+12);
+		glVertexAttribPointer(myShaders.a_color, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (char*)vertexData + 12);
 	}
 
 	if (myShaders.mMatrix != -1)
