@@ -4,14 +4,14 @@
 int Shaders::Init(char * fileVertexShader, char * fileFragmentShader)
 {
 	vertexShader = LoadShader(GL_VERTEX_SHADER, fileVertexShader);
-	if ( vertexShader == 0 )
+	if (vertexShader == 0)
 		return -1;
 
 	fragmentShader = LoadShader(GL_FRAGMENT_SHADER, fileFragmentShader);
 
-	if ( fragmentShader == 0 )
+	if (fragmentShader == 0)
 	{
-		glDeleteShader( vertexShader );
+		glDeleteShader(vertexShader);
 		return -2;
 	}
 	program = LoadProgram(vertexShader, fragmentShader);
@@ -19,7 +19,11 @@ int Shaders::Init(char * fileVertexShader, char * fileFragmentShader)
 	//finding location of uniforms / attributes
 	a_position = glGetAttribLocation(program, "a_position");
 	a_color = glGetAttribLocation(program, "color");
-	scale = glGetUniformLocation(program, "scale");
+	pMatrix = glGetUniformLocation(program, "pMatrix");
+	vMatrix = glGetUniformLocation(program, "vMatrix");
+	mMatrix = glGetUniformLocation(program, "mMatrix");
+
+
 	return 0;
 }
 /// \brief Load a shader, check for compile errors, print error messages to output log
@@ -27,49 +31,46 @@ int Shaders::Init(char * fileVertexShader, char * fileFragmentShader)
 /// \param Shaderrc Shader source string
 /// \return A new shader object on success, 0 on failure
 //
-GLuint Shaders::LoadShader ( GLenum type, const char * filename )
+GLuint Shaders::LoadShader(GLenum type, const char * filename)
 {
 	GLuint shader;
 	GLint compiled;
 
 	// Create the shader object
-	shader = glCreateShader ( type );
+	shader = glCreateShader(type);
 
-	if ( shader == 0 )
-	return 0;
-
-	
+	if (shader == 0)
+		return 0;
 
 	char * Shaderrc = FileSystem::GetInstance()->GetContent(filename);
 
-
-	glShaderSource ( shader, 1, (const char **)&Shaderrc, NULL );
-	delete [] Shaderrc;
+	glShaderSource(shader, 1, (const char **)&Shaderrc, NULL);
+	delete[] Shaderrc;
 
 	// Compile the shader
-	glCompileShader ( shader );
+	glCompileShader(shader);
 
 	// Check the compile status
-	glGetShaderiv ( shader, GL_COMPILE_STATUS, &compiled );
+	glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
 
-	if ( !compiled ) 
+	if (!compiled)
 	{
 		GLint infoLen = 0;
 
-		glGetShaderiv ( shader, GL_INFO_LOG_LENGTH, &infoLen );
+		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLen);
 
-		if ( infoLen > 1 )
+		if (infoLen > 1)
 		{
-			char* infoLog = new char  [infoLen];
+			char* infoLog = new char[infoLen];
 
 
-			glGetShaderInfoLog ( shader, infoLen, NULL, infoLog );
-			LOGI ( "Error compiling shader:\n%s\n", infoLog );            
+			glGetShaderInfoLog(shader, infoLen, NULL, infoLog);
+			LOGI("Error compiling shader:\n%s\n", infoLog);
 
-			delete [] infoLog;
+			delete[] infoLog;
 		}
 
-		glDeleteShader ( shader );
+		glDeleteShader(shader);
 		return 0;
 	}
 
@@ -82,44 +83,44 @@ GLuint Shaders::LoadShader ( GLenum type, const char * filename )
 /// \param fragShaderrc Fragment shader source code
 /// \return A new program object linked with the vertex/fragment shader pair, 0 on failure
 
-GLuint Shaders::LoadProgram ( GLuint vertexShader, GLuint fragmentShader )
+GLuint Shaders::LoadProgram(GLuint vertexShader, GLuint fragmentShader)
 {
 	GLuint programObject;
 	GLint linked;
 
 	// Create the program object
-	programObject = glCreateProgram ( );
+	programObject = glCreateProgram();
 
-	if ( programObject == 0 )
+	if (programObject == 0)
 		return 0;
 
-	glAttachShader ( programObject, vertexShader );
-	glAttachShader ( programObject, fragmentShader );
+	glAttachShader(programObject, vertexShader);
+	glAttachShader(programObject, fragmentShader);
 
 	// Link the program
-	glLinkProgram ( programObject );
+	glLinkProgram(programObject);
 
 	// Check the link status
-	glGetProgramiv ( programObject, GL_LINK_STATUS, &linked );
+	glGetProgramiv(programObject, GL_LINK_STATUS, &linked);
 
-	if ( !linked ) 
+	if (!linked)
 	{
 		GLint infoLen = 0;
 
-		glGetProgramiv ( programObject, GL_INFO_LOG_LENGTH, &infoLen );
+		glGetProgramiv(programObject, GL_INFO_LOG_LENGTH, &infoLen);
 
-		if ( infoLen > 1 )
+		if (infoLen > 1)
 		{
 			char* infoLog = new char[sizeof(char) * infoLen];
 
 
-			glGetProgramInfoLog ( programObject, infoLen, NULL, infoLog );
-			LOGI ( "Error linking program:\n%s\n", infoLog );            
+			glGetProgramInfoLog(programObject, infoLen, NULL, infoLog);
+			LOGI("Error linking program:\n%s\n", infoLog);
 
 			delete infoLog;
 		}
 
-		glDeleteProgram ( programObject );
+		glDeleteProgram(programObject);
 		return 0;
 	}
 
