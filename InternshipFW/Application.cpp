@@ -73,6 +73,11 @@ void Application::Render()
 		glEnableVertexAttribArray(myShaders.a_color);
 		glVertexAttribPointer(myShaders.a_color, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (char*)vertexData+12);
 	}
+	if (myShaders.translate != -1)
+	{
+		GLfloat tx = 0.1, ty = 0.5, tz = 0;
+		glUniform4f(myShaders.translate,tx, ty, tz, 0.0);
+	}
 
 	glDrawArrays(GL_TRIANGLES, 0, 3);
 }

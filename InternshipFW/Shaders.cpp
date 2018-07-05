@@ -19,7 +19,7 @@ int Shaders::Init(char * fileVertexShader, char * fileFragmentShader)
 	//finding location of uniforms / attributes
 	a_position = glGetAttribLocation(program, "a_position");
 	a_color = glGetAttribLocation(program, "color");
-
+	translate = glGetUniformLocation(program, "translate");
 	return 0;
 }
 /// \brief Load a shader, check for compile errors, print error messages to output log
