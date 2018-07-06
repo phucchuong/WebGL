@@ -6,7 +6,7 @@
 
 # define M_PI           3.14159265358979323846
 Shaders myShaders;
-GLuint VertexDataBuffer, IndicesBuffer, textureBuffer;
+GLuint VertexDataBuffer, TexcoordBuffer, textureBuffer;
 GLint n;
 
 bool LoadOBJ(const char* path, std::vector<Vector3> &out_vertex, std::vector<Vector2> &out_texcoord, std::vector<Vector3> &out_normals) {
@@ -122,15 +122,29 @@ int Application::Init(const char *resPath)
 	std::vector<Vector3> vertexData;
 	std::vector<Vector2> texcoordData;
 	std::vector<Vector3> normalData;
-	LoadOBJ("betty.obj", vertexData, texcoordData, normalData);
+	char* textureData = NULL;
+	//load vertex, texcoord, normal
+	if (!LoadOBJ("betty.obj", vertexData, texcoordData, normalData)) {
+		return 0;
+	}
 	n = vertexData.size();
+	// load texture
+	textureData = LoadTGA("betty_color.tga", &width, &height, &bpp);
+	if (!textureData) {
+		return 0;
+	}
 	/// buffer
 	glGenBuffers(1, &VertexDataBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, VertexDataBuffer);
-	glBufferData(GL_ARRAY_BUFFER, n*sizeof(Vector3), &vertexData[0], GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, n * sizeof(Vector3), &vertexData[0], GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, NULL);	
 
-	/*glGenTextures(1, &textureBuffer);
+	glGenBuffers(1, &TexcoordBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, TexcoordBuffer);
+	glBufferData(GL_ARRAY_BUFFER, n * sizeof(Vector2), &texcoordData[0], GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, NULL);
+
+	glGenTextures(1, &textureBuffer);
 	glBindTexture(GL_TEXTURE_2D, textureBuffer);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -142,7 +156,7 @@ int Application::Init(const char *resPath)
 	else {
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureData);
 	}
-	glBindTexture(GL_TEXTURE_2D, NULL);*/
+	glBindTexture(GL_TEXTURE_2D, NULL);
 
 	proj_matrix = get_projection(40, 800 / 640, 1, 100);
 	mov_matrix = new float[16]{ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
@@ -150,6 +164,8 @@ int Application::Init(const char *resPath)
 	view_matrix[14] = view_matrix[14] - 3;
 
 	vertexData.clear();
+	texcoordData.clear();
+	normalData.clear();
 	return true;
 }
 
@@ -166,7 +182,7 @@ void Application::Render()
 {
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_CULL_FACE);
-	//glEnable(GL_DEPTH_TEST);
+	glEnable(GL_DEPTH_TEST);
 	glClearColor(1, 1, 1, 0);
 
 	glUseProgram(myShaders.program);
@@ -177,18 +193,18 @@ void Application::Render()
 		glBindBuffer(GL_ARRAY_BUFFER, VertexDataBuffer);
 		glVertexAttribPointer(myShaders.a_position, 3, GL_FLOAT, GL_FALSE, sizeof(Vector3), 0);
 	}
-	/*if (myShaders.a_texcoord != -1)
+	if (myShaders.a_texcoord != -1)
 	{
 		glEnableVertexAttribArray(myShaders.a_texcoord);
-		glBindBuffer(GL_ARRAY_BUFFER, VertexDataBuffer);
-		glVertexAttribPointer(myShaders.a_texcoord, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (char*)+12);
+		glBindBuffer(GL_ARRAY_BUFFER, TexcoordBuffer);
+		glVertexAttribPointer(myShaders.a_texcoord, 3, GL_FLOAT, GL_FALSE, sizeof(Vector2), 0);
 	}
 	if (myShaders.a_texture != -1)
 	{
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, textureBuffer);
 		glUniform1i(myShaders.a_texture, 0);
-	}*/
+	}
 	if (myShaders.mMatrix != -1)
 	{
 		glUniformMatrix4fv(myShaders.mMatrix, 1, GL_FALSE, mov_matrix);
@@ -202,9 +218,7 @@ void Application::Render()
 		glUniformMatrix4fv(myShaders.vMatrix, 1, GL_FALSE, view_matrix);
 	}
 	
-	/*glEnable(GL_TEXTURE_2D);
-	glBindBuffer(GL_ARRAY_BUFFER, IndicesBuffer);*/
-	
+	glEnable(GL_TEXTURE_2D);
 	glBindBuffer(GL_ARRAY_BUFFER, VertexDataBuffer);
 	glDrawArrays(GL_TRIANGLES, 0, n );
 }
